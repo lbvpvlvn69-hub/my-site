@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personality Words Trainer — Makar</title>
+<style>
+:root{--bg:#150d23;--panel:#211532;--panel2:#2b1b40;--text:#f8f5ff;--muted:#bdb2ca;--line:#493660;--green:#10d986;--yellow:#ffe600;--red:#ff1744;--purple:#9b3aaa}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 95% 0%,rgba(155,58,170,.25),transparent 27%),radial-gradient(circle at 0% 100%,rgba(18,183,204,.15),transparent 30%),var(--bg)}
+.wrap{max-width:1040px;margin:auto;padding:28px 18px 60px}
+.hero,.card{border:1px solid var(--line);border-radius:26px;background:var(--panel);box-shadow:0 14px 34px rgba(0,0,0,.18)}
+.hero{padding:28px;background:linear-gradient(135deg,#28183b,#190f27)}
+.kicker{color:var(--green);font-weight:950;letter-spacing:.12em;text-transform:uppercase;font-size:13px}
+h1{font-size:clamp(34px,6vw,60px);line-height:.95;margin:8px 0 10px}
+.hero p,.lead{color:var(--muted)}
+.tabs{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0}
+.tab{border:1px solid var(--line);background:var(--panel);color:white;border-radius:14px;padding:11px 15px;font-weight:900;cursor:pointer}
+.tab.active{background:var(--green);border-color:var(--green);color:#10231a}
+.panel{display:none}.panel.active{display:block}
+.card{padding:22px}
+h2{margin:0 0 5px;font-size:27px}.lead{margin:0 0 17px}
+.topline{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:850}
+.progress{height:9px;background:#352547;border-radius:999px;overflow:hidden;margin:13px 0 18px}
+.progress>div{height:100%;background:linear-gradient(90deg,var(--green),var(--yellow));transition:.3s}
+.flash{min-height:335px;display:grid;place-items:center;text-align:center;position:relative;border:2px solid var(--green);border-radius:24px;padding:28px;cursor:pointer;background:linear-gradient(145deg,#27173a,#1a1028)}
+.word{font-size:clamp(42px,8vw,72px);font-weight:1000}.ipa{font-size:18px;color:var(--green);font-weight:900;margin-top:6px}
+.answer{display:none;margin-top:23px}.flash.show .answer{display:block}.ru{font-size:27px;color:var(--yellow);font-weight:950}.def{margin-top:7px;color:#ddd4e8;font-size:18px}
+.example{max-width:680px;margin:15px auto 0;background:#342148;border-radius:15px;padding:14px;font-size:18px;line-height:1.4}.example b{color:var(--green)}
+.hint{position:absolute;bottom:13px;color:#887a99;font-size:13px}
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:15px}
+.btn{border:0;border-radius:14px;padding:11px 16px;font:inherit;font-weight:950;cursor:pointer;background:var(--green);color:#10231a}.btn.secondary{background:transparent;border:1px solid var(--line);color:white}.btn.purple{background:var(--purple);color:white}
+.matchgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.col{display:grid;gap:9px}
+.match{border:1px solid var(--line);background:#1b1129;color:white;border-radius:14px;padding:12px 14px;font-weight:850;text-align:left;cursor:pointer}.match.pick{border-color:var(--yellow);background:#3b2d16}.match.done{border-color:var(--green);background:#10392a;color:#c9ffe2;cursor:default}
+.feedback{min-height:27px;font-weight:900;margin-top:12px}
+.qbox{background:var(--panel2);border:1px solid var(--line);border-radius:19px;padding:18px}.question,.sentence{font-size:23px;font-weight:900;line-height:1.4;margin-bottom:14px}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.opt{border:1px solid var(--line);background:#1a1028;color:white;border-radius:14px;padding:13px;text-align:left;font-weight:900;cursor:pointer}.opt.good{background:#103a2b;border-color:var(--green)}.opt.bad{background:#47202d;border-color:var(--red)}
+.score{color:var(--green)}.blank{color:var(--yellow);font-weight:950}
+.donebox{text-align:center;padding:25px}.donebox strong{font-size:40px;color:var(--green)}
+footer{text-align:center;color:#776a85;margin-top:20px;font-size:13px}
+@media(max-width:680px){.matchgrid,.options{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<div class="kicker">Own It 3 • Vocabulary</div>
+<h1>PERSONALITY WORDS</h1>
+<p>12 adjectives. Learn them, recognise them in context, and use them with Present Perfect.</p>
+</header>
+
+<nav class="tabs">
+<button class="tab active" data-tab="learn">1. Learn</button>
+<button class="tab" data-tab="match">2. Match</button>
+<button class="tab" data-tab="context">3. Context</button>
+<button class="tab" data-tab="perfect">4. Present Perfect</button>
+</nav>
+
+<section class="panel active" id="learn"><div class="card">
+<h2>Learn the words</h2><p class="lead">Say the word aloud. Click the card to check the meaning and example.</p>
+<div class="topline"><span id="flashCount"></span><span>Click → reveal</span></div>
+<div class="progress"><div id="flashProgress"></div></div>
+<div class="flash" id="flash">
+<div><div class="word" id="fWord"></div><div class="ipa" id="fIpa"></div>
+<div class="answer"><div class="ru" id="fRu"></div><div class="def" id="fDef"></div><div class="example" id="fEx"></div></div></div>
+<div class="hint">tap / click the card</div></div>
+<div class="controls"><button class="btn secondary" id="prev">← Back</button><button class="btn purple" id="speak">🔊 Listen</button><button class="btn" id="next">Next →</button></div>
+</div></section>
+
+<section class="panel" id="match"><div class="card">
+<h2>Match</h2><p class="lead">Match the adjective with its definition.</p>
+<div class="topline"><span>Matched: <span class="score" id="matchScore">0</span>/6</span><button class="btn secondary" id="newSet">New set</button></div>
+<div class="matchgrid"><div class="col" id="wordsCol"></div><div class="col" id="defsCol"></div></div>
+<div class="feedback" id="matchFeedback"></div>
+</div></section>
+
+<section class="panel" id="context"><div class="card">
+<h2>Who is it?</h2><p class="lead">Read the situation and choose the best adjective.</p>
+<div class="topline"><span>Question <span id="qNum">1</span>/10</span><span>Score: <span class="score" id="qScore">0</span></span></div>
+<div class="progress"><div id="qProgress"></div></div><div id="quiz"></div>
+</div></section>
+
+<section class="panel" id="perfect"><div class="card">
+<h2>Present Perfect challenge</h2><p class="lead">Choose the adjective that best describes the person.</p>
+<div class="topline"><span>Sentence <span id="pNum">1</span>/8</span><span>Score: <span class="score" id="pScore">0</span></span></div>
+<div class="progress"><div id="pProgress"></div></div><div id="perfectBox"></div>
+</div></section>
+
+<footer>Personality Vocabulary Trainer • Makar</footer>
+</div>
+
+<script>
+const words=[
+{w:"sensible",ipa:"/ˈsen.sə.bəl/",ru:"рассудительный",def:"makes good decisions",ex:"She <b>has made</b> a sensible decision."},
+{w:"sensitive",ipa:"/ˈsen.sə.tɪv/",ru:"чуткий, чувствительный",def:"understands how other people feel",ex:"He <b>has always been</b> sensitive to other people."},
+{w:"cheerful",ipa:"/ˈtʃɪə.fəl/",ru:"жизнерадостный",def:"happy and positive",ex:"Mia <b>has been</b> cheerful all day."},
+{w:"confident",ipa:"/ˈkɒn.fɪ.dənt/",ru:"уверенный в себе",def:"believes they can do something well",ex:"Leo <b>has become</b> more confident this year."},
+{w:"helpful",ipa:"/ˈhelp.fəl/",ru:"готовый помочь",def:"helps other people",ex:"Amy <b>has helped</b> us many times."},
+{w:"sociable",ipa:"/ˈsəʊ.ʃə.bəl/",ru:"общительный",def:"likes being with other people",ex:"Eva <b>has made</b> lots of new friends."},
+{w:"active",ipa:"/ˈæk.tɪv/",ru:"активный",def:"does a lot of exercise and activities",ex:"Ben <b>has played</b> three sports this year."},
+{w:"talented",ipa:"/ˈtæl.ən.tɪd/",ru:"талантливый",def:"is naturally good at something",ex:"She <b>has won</b> two art competitions."},
+{w:"ambitious",ipa:"/æmˈbɪʃ.əs/",ru:"амбициозный, целеустремлённый",def:"really wants to be successful",ex:"Max <b>has worked</b> hard for his goals."},
+{w:"inspiring",ipa:"/ɪnˈspaɪə.rɪŋ/",ru:"вдохновляющий",def:"makes you want to do something",ex:"That athlete <b>has inspired</b> thousands of people."},
+{w:"patient",ipa:"/ˈpeɪ.ʃənt/",ru:"терпеливый",def:"doesn't get angry when things take time",ex:"Our teacher <b>has been</b> very patient."},
+{w:"calm",ipa:"/kɑːm/",ru:"спокойный",def:"relaxed and doesn't worry",ex:"She <b>has stayed</b> calm in every difficult situation."}
+];
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+
+document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{
+document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+btn.classList.add("active");document.getElementById(btn.dataset.tab).classList.add("active");
+});
+
+let fi=0;const flash=document.getElementById("flash");
+function renderFlash(){const x=words[fi];fWord.textContent=x.w;fIpa.textContent=x.ipa;fRu.textContent=x.ru;fDef.textContent=x.def;fEx.innerHTML=x.ex;flashCount.textContent=`${fi+1} / ${words.length}`;flashProgress.style.width=`${(fi+1)/words.length*100}%`;flash.classList.remove("show")}
+flash.onclick=()=>flash.classList.toggle("show");
+next.onclick=()=>{fi=(fi+1)%words.length;renderFlash()};prev.onclick=()=>{fi=(fi-1+words.length)%words.length;renderFlash()};
+speak.onclick=()=>{const u=new SpeechSynthesisUtterance(words[fi].w);u.lang="en-GB";speechSynthesis.cancel();speechSynthesis.speak(u)};renderFlash();
+
+let left=null,right=null,ms=0;
+function buildMatch(){ms=0;left=null;right=null;matchScore.textContent=0;matchFeedback.textContent="";const set=shuffle(words).slice(0,6);wordsCol.innerHTML="";defsCol.innerHTML="";
+shuffle(set).forEach(x=>{const b=document.createElement("button");b.className="match";b.textContent=x.w;b.dataset.key=x.w;b.onclick=()=>pick(b,"l");wordsCol.appendChild(b)});
+shuffle(set).forEach(x=>{const b=document.createElement("button");b.className="match";b.textContent=x.def;b.dataset.key=x.w;b.onclick=()=>pick(b,"r");defsCol.appendChild(b)})}
+function pick(el,type){if(el.classList.contains("done"))return;document.querySelectorAll(type==="l"?"#wordsCol .match":"#defsCol .match").forEach(x=>x.classList.remove("pick"));el.classList.add("pick");if(type==="l")left=el;else right=el;if(left&&right){if(left.dataset.key===right.dataset.key){left.classList.remove("pick");right.classList.remove("pick");left.classList.add("done");right.classList.add("done");ms++;matchScore.textContent=ms;matchFeedback.textContent=ms===6?"✅ Perfect!":"✅ Correct!"}else{const a=left,b=right;matchFeedback.textContent="❌ Try again.";setTimeout(()=>{a.classList.remove("pick");b.classList.remove("pick")},450)}left=null;right=null}}
+newSet.onclick=buildMatch;buildMatch();
+
+const contexts=[
+["Tom always makes good decisions, even in difficult situations.","sensible"],
+["Kate notices immediately when her friends are upset.","sensitive"],
+["Mia is smiling and joking even on Monday morning.","cheerful"],
+["Leo believes he can give a great presentation.","confident"],
+["Amy always offers to carry things and explain homework.","helpful"],
+["Eva loves meeting people and talking to everyone.","sociable"],
+["Ben plays football, swims and goes cycling every week.","active"],
+["Sara can draw amazing portraits without much practice.","talented"],
+["Max wants to start his own business and become successful.","ambitious"],
+["This musician makes young people want to learn guitar.","inspiring"],
+["Our coach never gets angry when we need more time.","patient"],
+["Lily doesn't panic before important exams.","calm"]
+];
+let qs=[],qi=0,qscore=0,qlock=false;
+function startQuiz(){qs=shuffle(contexts).slice(0,10);qi=0;qscore=0;qScore.textContent=0;renderQuiz()}
+function renderQuiz(){qlock=false;const [q,ans]=qs[qi];qNum.textContent=qi+1;qProgress.style.width=`${(qi+1)/10*100}%`;const ch=shuffle([ans,...shuffle(words.filter(x=>x.w!==ans)).slice(0,3).map(x=>x.w)]);quiz.innerHTML=`<div class="qbox"><div class="question">${q}</div><div class="options">${ch.map(x=>`<button class="opt" data-word="${x}">${x}</button>`).join("")}</div><div class="feedback"></div></div>`;document.querySelectorAll("#quiz .opt").forEach(b=>b.onclick=()=>checkQuiz(b,ans))}
+function checkQuiz(btn,ans){if(qlock)return;qlock=true;document.querySelectorAll("#quiz .opt").forEach(x=>{if(x.dataset.word===ans)x.classList.add("good")});const fb=document.querySelector("#quiz .feedback");if(btn.dataset.word===ans){qscore++;qScore.textContent=qscore;fb.textContent="✅ Correct!"}else{btn.classList.add("bad");fb.textContent=`❌ ${ans}`}setTimeout(()=>{qi++;if(qi<10)renderQuiz();else quiz.innerHTML=`<div class="donebox"><strong>${qscore}/10</strong><p>Nice work! 🎯</p><button class="btn" onclick="startQuiz()">Try again</button></div>`},750)}
+startQuiz();
+
+const perfect=[
+["Mia ________ cheerful all day, even though the weather is terrible.","has been","cheerful"],
+["Leo ________ much more confident since he joined drama club.","has become","confident"],
+["Amy ________ her classmates many times. She's always ready to help.","has helped","helpful"],
+["Eva ________ lots of new friends this year.","has made","sociable"],
+["Ben ________ three sports this year and goes to the gym too.","has tried","active"],
+["Sara ________ two art competitions already.","has won","talented"],
+["Max ________ hard for years because he wants to be successful.","has worked","ambitious"],
+["Our teacher ________ calm even when the class has been noisy.","has stayed","calm"],
+["Jack ________ other people's feelings very carefully.","has always understood","sensitive"],
+["Our coach ________ patient with us all season.","has been","patient"],
+["That speaker ________ many teenagers to follow their dreams.","has inspired","inspiring"],
+["Emma ________ several sensible decisions about her future.","has made","sensible"]
+];
+let ps=[],pi=0,pscore=0,plock=false;
+function startPerfect(){ps=shuffle(perfect).slice(0,8);pi=0;pscore=0;pScore.textContent=0;renderPerfect()}
+function renderPerfect(){plock=false;const [s,v,ans]=ps[pi];pNum.textContent=pi+1;pProgress.style.width=`${(pi+1)/8*100}%`;const ch=shuffle([ans,...shuffle(words.filter(x=>x.w!==ans)).slice(0,3).map(x=>x.w)]);perfectBox.innerHTML=`<div class="qbox"><div class="sentence">${s.replace("________",`<span class="blank">${v}</span>`)}</div><div class="options">${ch.map(x=>`<button class="opt" data-word="${x}">${x}</button>`).join("")}</div><div class="feedback"></div></div>`;document.querySelectorAll("#perfectBox .opt").forEach(b=>b.onclick=()=>checkPerfect(b,ans))}
+function checkPerfect(btn,ans){if(plock)return;plock=true;document.querySelectorAll("#perfectBox .opt").forEach(x=>{if(x.dataset.word===ans)x.classList.add("good")});const fb=document.querySelector("#perfectBox .feedback");if(btn.dataset.word===ans){pscore++;pScore.textContent=pscore;fb.textContent="✅ Exactly!"}else{btn.classList.add("bad");fb.textContent=`❌ ${ans}`}setTimeout(()=>{pi++;if(pi<8)renderPerfect();else perfectBox.innerHTML=`<div class="donebox"><strong>${pscore}/8</strong><p>Vocabulary + Present Perfect complete! ⭐</p><button class="btn" onclick="startPerfect()">Again</button></div>`},800)}
+startPerfect();
+</script>
+</body>
+</html>
